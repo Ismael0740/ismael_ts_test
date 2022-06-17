@@ -5,8 +5,10 @@ export type Product = {
   id: string;
   replacementProductId?: string;
   replacementDate?: Date;
-} & Record<keyof any, any>;
-
+};
+/**
+ * left original product, right replacementProductId
+ */
 type ProductsMap = Map<Product['id'], Product['id']>;
 type Returned = {
   map: ProductsMap;
@@ -26,6 +28,37 @@ export function generateProductSubstitutesMap(
   const productsIndexed = generateProductsByIdIndex(products); //This is for getting a product by id with O(1) cost
 
   // YOUR CODE GOES HERE
+
+  products.forEach((product) => {
+    var counter = 0;
+    var bool = true;
+    let id = product.id;
+    let replacementProductId = product.replacementProductId;
+    let replacementDate = product.replacementDate;
+
+    while (bool) {
+      if (replacementProductId == undefined) {
+        bool = false;
+
+        if (counter > 0) {
+          map.set(product.id, id);
+        }
+      } else {
+        if (replacementDate! > now) {
+          bool = false;
+
+          if (counter > 0) {
+            map.set(product.id, id);
+          }
+        } else {
+          id = replacementProductId;
+          replacementProductId = productsIndexed.get(id)?.replacementProductId;
+          replacementDate = productsIndexed.get(id)?.replacementDate;
+          counter++;
+        }
+      }
+    }
+  });
 
   return { map, productsWithErrors };
 }
